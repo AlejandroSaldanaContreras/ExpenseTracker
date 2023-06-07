@@ -10,6 +10,7 @@ function ManageExpense({ route, navigation }){
     const expensesCtx = useContext(ExpensesContext);
     const editedExpenseId = route.params?.expenseId;
     const isEditing = !!editedExpenseId;
+    const selectedExpense = expensesCtx.expenses.find(expense => expense.id === editedExpenseId);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -26,22 +27,21 @@ function ManageExpense({ route, navigation }){
         navigation.goBack();
 
     }
-    function confirmHandler(){
+    function confirmHandler(expenseData){
         if(isEditing) {
-            expensesCtx.updateExpense(editedExpenseId, {description: 'Books', amount: 15.55, date: new Date('2023-06-02')});
+            expensesCtx.updateExpense(editedExpenseId, expenseData);
         } else {
-            expensesCtx.addExpense({description: 'Books', amount: 15.55, date: new Date('2023-06-02'), });
+            expensesCtx.addExpense(expenseData);
         }
         navigation.goBack();
     }
 
     return(
         <View style={styles.container}>
-            <ExpenseForm />
-            <View style={styles.buttonContainer}>
-                <Button style={styles.button} mode="flat" onPress={cancelHandler} >Cancel</Button>
-                <Button style={styles.button} onPress={confirmHandler}>{isEditing ? 'Update' : 'Add'}</Button>
-            </View>
+            <ExpenseForm onCancel={cancelHandler} 
+                        submitButtonLabel={isEditing ? 'Update' : 'Add'}
+                        onSubmit={confirmHandler}
+                        defaultValues={selectedExpense}/>
             <View  style={styles.deleteContainer}>
                 {isEditing && (
                 <IconButton name="trash" color={GlobalStyles.colors.error500} 
@@ -68,13 +68,5 @@ const styles = StyleSheet.create({
         borderTopColor: GlobalStyles.colors.primary200,
          alignItems: 'center',
     },
-    buttonContainer:{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    button:{
-        minWidth: 120,
-        marginHorizontal: 8,
-    }
+    
 });
